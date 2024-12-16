@@ -39,13 +39,13 @@ def simulation_sth(cfg_name_, topo_name_, thread_num_):
     from project import base_scalesim_code_path, base_config_path, base_topology_path, base_raw_data_path
     os.makedirs(f"{base_raw_data_path}/{thread_num_}", exist_ok=True)
     
-    cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name_}.cfg -t {base_topology_path}/{topo_name_}.csv -p {base_raw_data_path}/{thread_num_} -i conv > /dev/null 2>&1"
+    cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name_}.cfg -t {base_topology_path}/{topo_name_}.csv -p {base_raw_data_path}/{thread_num_} -i conv"
     # print(cmd)
     # Use os.popen and read to ensure the process waits for completion
     os.popen(cmd).read()  # read() waits for the command to complete
     
     # Load the CSV file
-    file_path_compute_report = f'{base_raw_data_path}/{thread_num_}/COMPUTE_REPORT.csv'
+    file_path_compute_report = f'{base_raw_data_path}/{thread_num_}/{cfg_name_}/COMPUTE_REPORT.csv'
     compute_report_df = pd.read_csv(file_path_compute_report)
     compute_report_df['LayerID'] = compute_report_df['LayerID'].apply(lambda x: f'{cfg_name_}_{topo_name_}_{x}')
     # # Extract the relevant columns

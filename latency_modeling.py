@@ -44,21 +44,21 @@ def get_latency_util(op_info_, BW_, n_card_, n_core, core_config_):
         K       = dim_info[3]
         N       = dim_info[4]
     
-        if Op_type == "FC":
+        # if Op_type == "FC":
             
-        elif Op_type == "Attn":
+        # elif Op_type == "Attn":
             
-        elif Op_name in "Softmax":
-            return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
+        # elif Op_name in "Softmax":
+        #     return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
             
-        elif Op_name in "AllReduce":
-            return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
+        # elif Op_name in "AllReduce":
+        #     return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
         
-        elif: Op_name in "Layernorm":
-            return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
+        # elif Op_name in "Layernorm":
+        #     return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
         
-        elif Op_name in "Residual":
-            return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
+        # elif Op_name in "Residual":
+        #     return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
         
-        else:
-            assert False, "지원하지 않는 Operation 입니다."
+        # else:
+        #     assert False, "지원하지 않는 Operation 입니다."

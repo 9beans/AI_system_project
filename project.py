@@ -14,7 +14,7 @@ def get_divisors(num):
     divisors.sort()
     return divisors
 
-
+NPU_name = "TPUv4"
 simulation_threads = 64
 
 base_scalesim_code_path = "./scale-sim-v2/scalesim/scale.py"
@@ -29,7 +29,7 @@ os.makedirs(base_raw_data_path, exist_ok=True)
 
 frequency = 250 * (10 ** 6)             # unit : MHz (Peak performance = 42 GMACS)
 scratchpad_bw = 10                      # word(1 byte)/cycle per scratchpad
-base_PE_num = 168                       # the number of PE in a baseline core(eyeriss core)
+base_PE_num = 128 * 128                 # the number of PE in a baseline core(TPUv4 core)
 mem_bw = scratchpad_bw * 3 * frequency  # word(1 byte)/cycle per scratchpad
 vector_FLOPS = 1
 
@@ -57,8 +57,8 @@ micro_batch    = micro_batch
 
 Topology_search_space = []
 
-max_core_scale = 1
-max_card_scale = 1
+max_core_scale = 8
+max_card_scale = 8
 
 n_core = 1
 while n_core <= max_core_scale:
@@ -73,7 +73,7 @@ while n_core <= max_core_scale:
         cfg_name_list = []
         
         for core_config in total_hw_search_space:
-            cfg_name_list.append(f"eyeriss_{core_config[0]}_{core_config[1]}_{core_config[2]}_{core_config[3]}_{core_config[4]}_{core_config[5]}")
+            cfg_name_list.append(f"{NPU_name}_{core_config[0]}_{core_config[1]}_{core_config[2]}_{core_config[3]}_{core_config[4]}_{core_config[5]}")
         
         for card_parallelism in card_parallelism_list:
             TP = card_parallelism[0]
@@ -107,7 +107,7 @@ while n_core <= max_core_scale:
                     make_topology(topo_name, op_info)
                     
                     for core_config in total_hw_search_space:
-                        cfg_name = f"eyeriss_{core_config[0]}_{core_config[1]}_{core_config[2]}_{core_config[3]}_{core_config[4]}_{core_config[5]}"
+                        cfg_name = f"{NPU_name}_{core_config[0]}_{core_config[1]}_{core_config[2]}_{core_config[3]}_{core_config[4]}_{core_config[5]}"
                         check = check_exception(op_info, core_config)
                         if check:
                             if cfg_name not in topo_name_dict:

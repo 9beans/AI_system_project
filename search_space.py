@@ -50,7 +50,7 @@ def make_op_info(Core_parallelism_, workload_dim_dict_):
                             "FFN1"          : ("FC"     , math.ceil(n_micro_batch / H_tiles)            , math.ceil(n_token / M_tiles)      , math.ceil(d_model / K_tiles)          , math.ceil(intersize / N_tiles)),       
                             "ACT"           : ("else"   , n_token * n_micro_batch                       , intersize                         , 1                                     , 1),
                             "FFN2"          : ("FC"     , math.ceil(n_micro_batch / H_tiles)            , math.ceil(n_token / M_tiles)      , math.ceil(intersize / K_tiles)        , math.ceil(d_model / N_tiles)),
-                            "AllReduce_2"   : ("comm"   , n_token * n_micro_batch                       , d_model                           , 1                                     , 1)
+                            "AllReduce_2"   : ("comm"   , n_token * n_micro_batch                       , d_model                           , 1                                     , 1),
                             "Residual_2"    : ("else"   , n_token * n_micro_batch                       , d_model                           , 1                                     , 1),
                             "Layernorm_2"   : ("else"   , n_token * n_micro_batch                       , d_model                           , 1                                     , 1),
                             }
@@ -97,24 +97,25 @@ def Topo_search_space(card_num_, core_num_, card_parallelism_list_, core_paralle
 
 def HW_search_space(PE_num_, total_hw_search_space_):
     systolic_dim_list = [
-        (2, 84),
-        (3, 56),
-        (4, 42),
-        (6, 28),
-        (7, 24),
-        (8, 21),
-        (12, 14),
-        (14, 12),
-        (21, 8),
-        (24, 7),
-        (28, 6),
-        (42, 4),
-        (56, 3),
-        (84, 2),
+        # (1, 16384),
+        # (2, 8192),
+        # (4, 4096),
+        # (8, 2048),
+        # (16, 1024),
+        (32, 512),
+        (64, 256),
+        (128, 128),
+        (256, 64),
+        (512, 32),
+        # (1024, 16),
+        # (2048, 8),
+        # (4096, 4),
+        # (8192, 2),
+        # (16384, 1),
     ]
-    IRAM = 36
-    WRAM = 36
-    ORAM = 36
+    IRAM = 6    # MiB
+    WRAM = 6    # MiB
+    ORAM = 4    # MiB
     
     for systolic_dim in systolic_dim_list:
         if (systolic_dim[0] % 2 == 0) & (systolic_dim[1] % 2 == 0):     # 홀수 PE dimension은 건너뛰기
