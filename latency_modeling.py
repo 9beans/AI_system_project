@@ -1,3 +1,6 @@
+import os
+import pandas as pd
+
 def AR_latency(H_, d_size_, BW_, n_dev_):
     from project import vector_FLOPS
     byte = 2
@@ -36,29 +39,36 @@ def get_FLOPs(Op_name_, dim_info_):
 
 def get_latency_util(op_info_, BW_, n_card_, n_core, core_config_):
     from project import vector_FLOPS
-    for Op_name, dim_info in op_info_.items():
-        dim_info = op_info_[Op_name]
-        Op_type = dim_info[0]
-        H       = dim_info[1]
-        M       = dim_info[2]
-        K       = dim_info[3]
-        N       = dim_info[4]
+    from project import base_raw_data_path, total_raw_data_fname
     
-        # if Op_type == "FC":
+    # for Op_name, dim_info in op_info_.items():
+    #     dim_info = op_info_[Op_name]
+    #     Op_type = dim_info[0]
+    #     H       = dim_info[1]
+    #     M       = dim_info[2]
+    #     K       = dim_info[3]
+    #     N       = dim_info[4]
+    
+    #     existing_df = None
+    #     if os.path.isfile(f"{base_raw_data_path}/{total_raw_data_fname}"):
+    #         existing_df = pd.read_csv(f"{base_raw_data_path}/{total_raw_data_fname}")
             
-        # elif Op_type == "Attn":
+        
+    #     if Op_type == "FC":
+    #         existing_df
+    #     elif Op_type == "Attn":
             
-        # elif Op_name in "Softmax":
-        #     return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
+    #     elif Op_name in "Softmax":
+    #         return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
             
-        # elif Op_name in "AllReduce":
-        #     return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
+    #     elif Op_name in "AllReduce":
+    #         return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
         
-        # elif Op_name in "Layernorm":
-        #     return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
+    #     elif Op_name in "Layernorm":
+    #         return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
         
-        # elif Op_name in "Residual":
-        #     return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
+    #     elif Op_name in "Residual":
+    #         return (get_FLOPs(Op_name, dim_info) / (vector_FLOPS * n_core), 0)
         
-        # else:
-        #     assert False, "지원하지 않는 Operation 입니다."
+    #     else:
+    #         assert False, "지원하지 않는 Operation 입니다."

@@ -42,7 +42,7 @@ def simulation_sth(cfg_name_, topo_name_, thread_num_):
     cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name_}.cfg -t {base_topology_path}/{topo_name_}.csv -p {base_raw_data_path}/{thread_num_} -i conv"
     # print(cmd)
     # Use os.popen and read to ensure the process waits for completion
-    os.popen(cmd).read()  # read() waits for the command to complete
+    # os.popen(cmd).read()  # read() waits for the command to complete
     
     # Load the CSV file
     file_path_compute_report = f'{base_raw_data_path}/{thread_num_}/{cfg_name_}/COMPUTE_REPORT.csv'
@@ -66,16 +66,18 @@ def simulation_mth(cfg_name_list_, topo_name_dict_):
     print(f"# total : {search_space_topo}")
     
     existing_df = None
+    exist = False
     if os.path.isfile(f"{base_raw_data_path}/{total_raw_data_fname}"):
         existing_df = pd.read_csv(f"{base_raw_data_path}/{total_raw_data_fname}")
+        exist = True
         
     cfg_topo_list = []
     case_num = 0
     for cfg_name in cfg_name_list_:
         topo_name_list = topo_name_dict_[cfg_name]
         for topo_name in topo_name_list:
-            if (existing_df != None):
-                if f"{cfg_name}_{topo_name}_0" in existing_df['LayerID']:
+            if exist:
+                if f"{cfg_name}_{topo_name}_0" in existing_df['LayerID'].values:
                     continue
             cfg_topo_list.append((cfg_name, topo_name, case_num % simulation_threads))
             case_num += 1
@@ -102,15 +104,15 @@ def simulation_mth(cfg_name_list_, topo_name_dict_):
         pool.join()
         
         result_df_list = []
-        for thread in range(len(total_thread_num)):
+        for thread in range(total_thread_num):
             result_df_list.append(output_list[thread])
         combined_df = pd.concat(result_df_list, ignore_index=True)
         
         # Check if the file exists
-        if os.path.isfile(f"{base_raw_data_path}/{total_raw_data_fname}"):
+        if exist:
             existing_df = pd.read_csv(f"{base_raw_data_path}/{total_raw_data_fname}")
             combined_df = pd.concat([existing_df, combined_df], ignore_index=True)
         
-        combined_df.to_csv({base_raw_data_path}/{total_raw_data_fname}, index=False)
+        combined_df.to_csv(f"{base_raw_data_path}/{total_raw_data_fname}", index=False)
         
         
