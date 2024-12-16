@@ -121,4 +121,4 @@ def HW_search_space(PE_num_, total_hw_search_space_):
         if (systolic_dim[0] % 2 == 0) & (systolic_dim[1] % 2 == 0):     # 홀수 PE dimension은 건너뛰기
             assert PE_num_ == (systolic_dim[0] * systolic_dim[1]), "설정한 전체 PE 개수와 systolic array에 배치된 PE 개수가 다릅니다."
             total_hw_search_space_.append((systolic_dim[0], systolic_dim[1], "os", IRAM, WRAM, ORAM))
-            total_hw_search_space_.append((systolic_dim[0], systolic_dim[1], "ws", IRAM, WRAM, ORAM))
+            # total_hw_search_space_.append((systolic_dim[0], systolic_dim[1], "ws", IRAM, WRAM, ORAM))

@@ -117,10 +117,5 @@ while n_core <= max_core_scale:
                             continue
                         
                 simulation_mth(cfg_name_list, topo_name_dict)
-                print(f"{n_card}-card {n_core}-core simulation end")
-            
-            
-            
+                print(f"{n_card}-card {n_core}-core {micro_batch}-micro_batch simulation end")
     n_core *= 2
-
-
