@@ -45,7 +45,8 @@ assert n_batch % micro_batch == 0, "micro_batch가 batch의 약수이어야 합�
 
 
 # n_layer, n_head, d_head
-target_model = (12, 12, 64)                         # gpt2_small
+# target_model = (12, 12, 64)                         # gpt2_small
+target_model = (32, 32, 128)                        # gpt3_6.7B
 LLM_dimension = {}
 n_layer        = target_model[0]                    # 12
 n_head         = target_model[1]                    # 12

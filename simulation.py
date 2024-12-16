@@ -40,6 +40,7 @@ def simulation_sth(cfg_name_, topo_name_, thread_num_):
     os.makedirs(f"{base_raw_data_path}/{thread_num_}", exist_ok=True)
     
     cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name_}.cfg -t {base_topology_path}/{topo_name_}.csv -p {base_raw_data_path}/{thread_num_} -i conv"
+    # cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name_}.cfg -t {base_topology_path}/{topo_name_}.csv -p {base_raw_data_path}/{thread_num_} -i conv > /dev/null 2>&1"
     # print(cmd)
     # Use os.popen and read to ensure the process waits for completion
     os.popen(cmd).read()  # read() waits for the command to complete
