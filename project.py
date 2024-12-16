@@ -95,8 +95,8 @@ transformer_operation = {               # (Op type  , H                        ,
 
 Topology_search_space = []
 
-max_core_scale = 128
-max_card_scale = 8
+max_core_scale = 1
+max_card_scale = 1
 
 n_core = 1
 while n_core <= max_core_scale:
@@ -155,6 +155,7 @@ while n_core <= max_core_scale:
                             continue
                         
                 simulation_mth(cfg_name_list, topo_name_dict)
+                print(f"{n_card}-card {n_core}-core simulation end")
     n_core *= 2
 
 

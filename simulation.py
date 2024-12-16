@@ -12,12 +12,12 @@ def make_topology(topo_name_, op_info_):
         'Layer name': target_op_list,
         'IFMAP Height': [],                         # M
         'IFMAP Width': [],                          # K
-        'Filter Height': [1, 1, 1, 1, 1, 1],           # 1
+        'Filter Height': [1, 1, 1, 1, 1, 1],        # 1
         'Filter Width': [],                         # K
-        'Channels': [1, 1, 1, 1, 1, 1],                # 1
-        'Num Filter': [],                          # N
-        'Strides': [1, 1, 1, 1, 1, 1],                 # 1
-        'batch size': [1, 1, 1, 1, 1, 1]               # 1
+        'Channels': [1, 1, 1, 1, 1, 1],             # 1
+        'Num Filter': [],                           # N
+        'Strides': [1, 1, 1, 1, 1, 1],              # 1
+        'batch size': [1, 1, 1, 1, 1, 1]            # 1
     }
 
     for op in target_op_list:
@@ -39,17 +39,10 @@ def simulation_sth(cfg_name_, topo_name_, thread_num_):
     from project import base_scalesim_code_path, base_config_path, base_topology_path, base_raw_data_path
     os.makedirs(f"{base_raw_data_path}/{thread_num_}", exist_ok=True)
     
-    cmd = [
-        "python3", 
-        base_scalesim_code_path, 
-        "-c", f"{base_config_path}/{cfg_name_}.cfg", 
-        "-t", f"{base_topology_path}/{topo_name_}.csv", 
-        "-p", f"{base_raw_data_path}/{thread_num_}", 
-        "-i", "conv"
-    ]
-    
-    with open(os.devnull, 'w') as devnull:
-        subprocess.run(cmd, stdout=devnull, stderr=devnull)
+    cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name_}.cfg -t {base_topology_path}/{topo_name_}.csv -p {base_raw_data_path}/{thread_num_} -i conv > /dev/null 2>&1"
+    # print(cmd)
+    # Use os.popen and read to ensure the process waits for completion
+    os.popen(cmd).read()  # read() waits for the command to complete
     
     # Load the CSV file
     file_path_compute_report = f'{base_raw_data_path}/{thread_num_}/COMPUTE_REPORT.csv'
@@ -93,13 +86,15 @@ def simulation_mth(cfg_name_list_, topo_name_dict_):
     
     max_iter = math.ceil(len(cfg_topo_list)/simulation_threads)
     for iter in range(max_iter):
+        print(f"simulation...{iter + 1}/{max_iter}")
         total_thread_num = 0
         if iter == (max_iter - 1):
             total_thread_num = len(cfg_topo_list) % simulation_threads
-            assert cfg_topo_list[-1][2] == (total_thread_num - 1)
+            if total_thread_num == 0:
+                total_thread_num = simulation_threads
         else:
             total_thread_num = simulation_threads
-            
+        # breakpoint()
         pool = multiprocessing.Pool(processes=total_thread_num)
         assert (cfg_topo_list[total_thread_num * iter][2] == 0) & (cfg_topo_list[total_thread_num * iter + (total_thread_num - 1)][2] == (total_thread_num - 1)), "Task가 다른 Thread에 할당되었습니다."
         output_list = pool.starmap(simulation_sth, cfg_topo_list[total_thread_num * iter : total_thread_num * iter + total_thread_num])
@@ -117,4 +112,5 @@ def simulation_mth(cfg_name_list_, topo_name_dict_):
             combined_df = pd.concat([existing_df, combined_df], ignore_index=True)
         
         combined_df.to_csv({base_raw_data_path}/{total_raw_data_fname}, index=False)
+        
         
