@@ -66,7 +66,7 @@ def simulation_sth(core_config_, topo_name_, thread_num_):
     from project import base_scalesim_code_path, base_config_path, base_topology_path, base_raw_data_path
     os.makedirs(f"{base_raw_data_path}/{thread_num_}", exist_ok=True)
     
-    cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name}.cfg -t {base_topology_path}/{topo_name_}_.csv -p {base_raw_data_path}/{thread_num_} -i conv"
+    cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name}.cfg -t {base_topology_path}/{topo_name_}_{core_config_[2]}.csv -p {base_raw_data_path}/{thread_num_} -i conv"
     # cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name}.cfg -t {base_topology_path}/{topo_name_}.csv -p {base_raw_data_path}/{thread_num_} -i conv > /dev/null 2>&1"
     # print(cmd)
     # Use os.popen and read to ensure the process waits for completion
@@ -82,10 +82,6 @@ def simulation_sth(core_config_, topo_name_, thread_num_):
     return compute_report_df
 
 def simulation_mth(total_hw_search_space_, topo_name_dict_):
-    cfg_name_list = []
-    for core_config in total_hw_search_space_:
-        cfg_name_list.append(f"{NPU_name}_{core_config[0]}_{core_config[1]}_{core_config[2]}_{core_config[3]}_{core_config[4]}_{core_config[5]}")
-    
     from project import base_raw_data_path, simulation_threads, total_raw_data_fname
     search_space_topo = 0
     search_space_cfg = 0
@@ -131,8 +127,8 @@ def simulation_mth(total_hw_search_space_, topo_name_dict_):
             total_thread_num = simulation_threads
         # breakpoint()
         pool = multiprocessing.Pool(processes=total_thread_num)
-        assert (cfg_topo_list[total_thread_num * iter][2] == 0) & (cfg_topo_list[total_thread_num * iter + (total_thread_num - 1)][2] == (total_thread_num - 1)), "Task가 다른 Thread에 할당되었습니다."
-        output_list = pool.starmap(simulation_sth, cfg_topo_list[total_thread_num * iter : total_thread_num * iter + total_thread_num])
+        assert (cfg_topo_list[simulation_threads * iter][2] == 0) & (cfg_topo_list[simulation_threads * iter + (total_thread_num - 1)][2] == (total_thread_num - 1)), "Task가 다른 Thread에 할당되었습니다."
+        output_list = pool.starmap(simulation_sth, cfg_topo_list[simulation_threads * iter : simulation_threads * iter + total_thread_num])
         pool.close()
         pool.join()
         
