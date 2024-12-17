@@ -45,8 +45,8 @@ assert n_batch % micro_batch == 0, "micro_batch가 batch의 약수이어야 합�
 
 
 # n_layer, n_head, d_head
-# target_model = (12, 12, 64)                         # gpt2_small
-target_model = (24, 16, 128)                        # MPT-1B redpajama
+target_model = (12, 12, 64)                         # gpt2_small
+# target_model = (24, 16, 128)                        # MPT-1B redpajama
 # target_model = (32, 32, 128)                        # gpt3_6.7B
 LLM_dimension = {}
 n_layer        = target_model[0]                    # 12
@@ -63,10 +63,12 @@ max_core_scale = 8
 max_card_scale = 8
 
 n_core = 1
+
 while n_core <= max_core_scale:
-    for n_card in range(1, max_card_scale + 1):
+    n_card = 1
+    while n_card <= max_card_scale:
         if (n_card != 1) & (n_core != max_core_scale):      # card를 scaleup 하기 전에 core부터 최대한 scaleup 하도록 설정
-            continue
+            break
         # [TP, PP, DP], [H, M, K, N], [h, w, dataflow, i, f, o]
         card_parallelism_list, core_parallelism_list, total_hw_search_space = [], [], []
         Topo_search_space(n_card, n_core, card_parallelism_list, core_parallelism_list)
@@ -119,4 +121,5 @@ while n_core <= max_core_scale:
                         
                 simulation_mth(total_hw_search_space, topo_name_dict)
                 print(f"{n_card}-card {n_core}-core {micro_batch}-micro_batch {TP}-{PP}-{DP}-card_parallelism simulation end")
+        n_card *= 2
     n_core *= 2
