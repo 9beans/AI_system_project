@@ -4,11 +4,27 @@ import math
 import multiprocessing
 import subprocess
 
+def cfg_name_maker(core_config_):
+    from project import NPU_name
+    return f"{NPU_name}_{core_config_[0]}_{core_config_[1]}_{core_config_[2]}_{core_config_[3]}_{core_config_[4]}_{core_config_[5]}"
+
 def make_topology(topo_name_, op_info_):
     from project import base_topology_path
     target_op_list = ['QKV', 'QKT', 'SV', 'PROJ', 'FFN1', 'FFN2']
     
-    data = {
+    os_data = {
+        'Layer name': target_op_list,
+        'IFMAP Height': [],                         # M
+        'IFMAP Width': [],                          # K
+        'Filter Height': [1, 1, 1, 1, 1, 1],        # 1
+        'Filter Width': [],                         # K
+        'Channels': [1, 1, 1, 1, 1, 1],             # 1
+        'Num Filter': [],                           # N
+        'Strides': [1, 1, 1, 1, 1, 1],              # 1
+        'batch size': [1, 1, 1, 1, 1, 1]            # 1
+    }
+    
+    ws_data = {
         'Layer name': target_op_list,
         'IFMAP Height': [],                         # M
         'IFMAP Width': [],                          # K
@@ -27,34 +43,49 @@ def make_topology(topo_name_, op_info_):
         M = dim_info[2]
         K = dim_info[3]
         N = dim_info[4]
-        data['IFMAP Height'].append(M)
-        data['IFMAP Width'].append(K)
-        data['Filter Width'].append(K)
-        data['Num Filter'].append(N)
+        
+        os_data['IFMAP Height'].append(M)
+        os_data['IFMAP Width'].append(K)
+        os_data['Filter Width'].append(K)
+        os_data['Num Filter'].append(N)
+        
+        ws_data['IFMAP Height'].append(K)
+        ws_data['IFMAP Width'].append(M)
+        ws_data['Filter Width'].append(M)
+        ws_data['Num Filter'].append(N)
     
-    df = pd.DataFrame(data)
-    df.to_csv(f"{base_topology_path}/{topo_name_}.csv", index=False)
+    os_df = pd.DataFrame(os_data)
+    os_df.to_csv(f"{base_topology_path}/{topo_name_}_os.csv", index=False)
+    
+    ws_df = pd.DataFrame(ws_data)
+    ws_df.to_csv(f"{base_topology_path}/{topo_name_}_ws.csv", index=False)
 
-def simulation_sth(cfg_name_, topo_name_, thread_num_):
+
+def simulation_sth(core_config_, topo_name_, thread_num_):
+    cfg_name = cfg_name_maker(core_config_)
     from project import base_scalesim_code_path, base_config_path, base_topology_path, base_raw_data_path
     os.makedirs(f"{base_raw_data_path}/{thread_num_}", exist_ok=True)
     
-    cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name_}.cfg -t {base_topology_path}/{topo_name_}.csv -p {base_raw_data_path}/{thread_num_} -i conv"
-    # cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name_}.cfg -t {base_topology_path}/{topo_name_}.csv -p {base_raw_data_path}/{thread_num_} -i conv > /dev/null 2>&1"
+    cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name}.cfg -t {base_topology_path}/{topo_name_}_.csv -p {base_raw_data_path}/{thread_num_} -i conv"
+    # cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name}.cfg -t {base_topology_path}/{topo_name_}.csv -p {base_raw_data_path}/{thread_num_} -i conv > /dev/null 2>&1"
     # print(cmd)
     # Use os.popen and read to ensure the process waits for completion
     os.popen(cmd).read()  # read() waits for the command to complete
     
     # Load the CSV file
-    file_path_compute_report = f'{base_raw_data_path}/{thread_num_}/{cfg_name_}/COMPUTE_REPORT.csv'
+    file_path_compute_report = f'{base_raw_data_path}/{thread_num_}/{cfg_name}/COMPUTE_REPORT.csv'
     compute_report_df = pd.read_csv(file_path_compute_report)
-    compute_report_df['LayerID'] = compute_report_df['LayerID'].apply(lambda x: f'{cfg_name_}_{topo_name_}_{x}')
+    compute_report_df['LayerID'] = compute_report_df['LayerID'].apply(lambda x: f'{cfg_name}_{topo_name_}_{x}')
     # # Extract the relevant columns
     # extracted_data = compute_report_df[['Total Cycles', 'Overall Util %', 'Mapping Efficiency %', 'Compute Util %']]
 
     return compute_report_df
 
-def simulation_mth(cfg_name_list_, topo_name_dict_):
+def simulation_mth(total_hw_search_space_, topo_name_dict_):
+    cfg_name_list = []
+    for core_config in total_hw_search_space_:
+        cfg_name_list.append(f"{NPU_name}_{core_config[0]}_{core_config[1]}_{core_config[2]}_{core_config[3]}_{core_config[4]}_{core_config[5]}")
+    
     from project import base_raw_data_path, simulation_threads, total_raw_data_fname
     search_space_topo = 0
     search_space_cfg = 0
@@ -74,13 +105,14 @@ def simulation_mth(cfg_name_list_, topo_name_dict_):
         
     cfg_topo_list = []
     case_num = 0
-    for cfg_name in cfg_name_list_:
+    for core_config in total_hw_search_space_:
+        cfg_name = cfg_name_maker(core_config)
         topo_name_list = topo_name_dict_[cfg_name]
         for topo_name in topo_name_list:
             if exist:
                 if f"{cfg_name}_{topo_name}_0" in existing_df['LayerID'].values:
                     continue
-            cfg_topo_list.append((cfg_name, topo_name, case_num % simulation_threads))
+            cfg_topo_list.append((core_config, topo_name, case_num % simulation_threads))
             case_num += 1
     
     print(f"# total simulation : {case_num}")

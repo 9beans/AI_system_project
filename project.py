@@ -72,10 +72,9 @@ while n_core <= max_core_scale:
         Topo_search_space(n_card, n_core, card_parallelism_list, core_parallelism_list)
         HW_search_space(base_PE_num, total_hw_search_space)
         
-        cfg_name_list = []
-        
-        for core_config in total_hw_search_space:
-            cfg_name_list.append(f"{NPU_name}_{core_config[0]}_{core_config[1]}_{core_config[2]}_{core_config[3]}_{core_config[4]}_{core_config[5]}")
+        # cfg_name_list = []        
+        # for core_config in total_hw_search_space:
+        #     cfg_name_list.append(f"{NPU_name}_{core_config[0]}_{core_config[1]}_{core_config[2]}_{core_config[3]}_{core_config[4]}_{core_config[5]}")
         
         for card_parallelism in card_parallelism_list:
             TP = card_parallelism[0]
@@ -118,6 +117,6 @@ while n_core <= max_core_scale:
                         else:
                             continue
                         
-                simulation_mth(cfg_name_list, topo_name_dict)
+                simulation_mth(total_hw_search_space, topo_name_dict)
                 print(f"{n_card}-card {n_core}-core {micro_batch}-micro_batch {TP}-{PP}-{DP}-card_parallelism simulation end")
     n_core *= 2
