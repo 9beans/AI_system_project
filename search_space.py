@@ -44,15 +44,13 @@ def make_op_info(Core_parallelism_, workload_dim_dict_):
                             "Softmax"       : ("else"   , n_head * n_micro_batch                        , n_token                           , 1                                     , n_token),
                             "SV"            : ("Attn"   , math.ceil(n_head * n_micro_batch / H_tiles)   , math.ceil(n_token / M_tiles)      , math.ceil(n_token / K_tiles)          , math.ceil(d_head / N_tiles)),
                             "PROJ"          : ("FC"     , math.ceil(n_micro_batch / H_tiles)            , math.ceil(n_token / M_tiles)      , math.ceil(n_head * d_head / K_tiles)  , math.ceil(d_model / N_tiles)),
-                            "AllReduce_1"   : ("comm"   , n_token * n_micro_batch                       , d_model                           , 1                                     , 1),       
-                            "Residual_1"    : ("else"   , n_token * n_micro_batch                       , d_model                           , 1                                     , 1),       
-                            "Layernorm_1"   : ("else"   , n_token * n_micro_batch                       , d_model                           , 1                                     , 1),       
+                            "AllReduce"     : ("comm"   , n_token * n_micro_batch * 2                   , d_model                           , 1                                     , 1),       
+                            "Residual"      : ("else"   , n_token * n_micro_batch * 2                   , d_model                           , 1                                     , 1),       
+                            "Layernorm"     : ("else"   , n_token * n_micro_batch * 2                   , d_model                           , 1                                     , 1),       
                             "FFN1"          : ("FC"     , math.ceil(n_micro_batch / H_tiles)            , math.ceil(n_token / M_tiles)      , math.ceil(d_model / K_tiles)          , math.ceil(intersize / N_tiles)),       
                             "ACT"           : ("else"   , n_token * n_micro_batch                       , intersize                         , 1                                     , 1),
                             "FFN2"          : ("FC"     , math.ceil(n_micro_batch / H_tiles)            , math.ceil(n_token / M_tiles)      , math.ceil(intersize / K_tiles)        , math.ceil(d_model / N_tiles)),
-                            "AllReduce_2"   : ("comm"   , n_token * n_micro_batch                       , d_model                           , 1                                     , 1),
-                            "Residual_2"    : ("else"   , n_token * n_micro_batch                       , d_model                           , 1                                     , 1),
-                            "Layernorm_2"   : ("else"   , n_token * n_micro_batch                       , d_model                           , 1                                     , 1),
+                            "Send_Recv"     : ("else"   , n_token * n_micro_batch                       , d_model                           , 1                                     , 1),
                             }
     
     target_op_list = ['QKV', 'QKT', 'SV', 'PROJ', 'FFN1', 'FFN2']
