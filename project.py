@@ -46,7 +46,8 @@ assert n_batch % micro_batch == 0, "micro_batch가 batch의 약수이어야 합�
 
 # n_layer, n_head, d_head
 # target_model = (12, 12, 64)                         # gpt2_small
-target_model = (32, 32, 128)                        # gpt3_6.7B
+target_model = (24, 16, 128)                        # MPT-1B redpajama
+# target_model = (32, 32, 128)                        # gpt3_6.7B
 LLM_dimension = {}
 n_layer        = target_model[0]                    # 12
 n_head         = target_model[1]                    # 12
@@ -118,5 +119,5 @@ while n_core <= max_core_scale:
                             continue
                         
                 simulation_mth(cfg_name_list, topo_name_dict)
-                print(f"{n_card}-card {n_core}-core {micro_batch}-micro_batch simulation end")
+                print(f"{n_card}-card {n_core}-core {micro_batch}-micro_batch {TP}-{PP}-{DP}-card_parallelism simulation end")
     n_core *= 2

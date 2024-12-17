@@ -25,6 +25,7 @@ def get_FLOPs(Op_name_, dim_info_):
     
     elif "ACT" in Op_name_:
         return 8 * H * M * N        # GeLU
+        return 1 * H * M * N        # ReLU
     
     elif "Residual" in Op_name_:
         return H * M * N
