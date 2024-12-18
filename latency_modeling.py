@@ -39,7 +39,7 @@ def get_total_latency(layer_result_, n_batch_, micro_batch_, card_parallelism_):
     PP = card_parallelism_[1]
     DP = card_parallelism_[2]
     
-    PP_iteration = int(int(n_batch_ / DP) / micro_batch_) + PP - 1
+    PP_iteration = math.ceil(math.ceil(n_batch_ / DP) / micro_batch_) + PP - 1
     
     OP_latency_util =   {
                         "QKV"       : [0, 0],

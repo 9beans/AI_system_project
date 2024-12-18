@@ -3,6 +3,7 @@ import math
 from search_space import check_exception, make_op_info, Topo_search_space, HW_search_space
 from simulation import make_topology, simulation_mth
 from latency_modeling import get_latency_util
+import pickle
 
 def get_divisors(num):
     divisors = []
@@ -66,6 +67,8 @@ max_core_scale = 8
 max_card_scale = 8
 
 n_core = 1
+
+print("call")
 
 total_result = {}
 while n_core <= max_core_scale:
@@ -140,6 +143,8 @@ while n_core <= max_core_scale:
                         cfg_name = f"{NPU_name}_{core_config[0]}_{core_config[1]}_{core_config[2]}_{core_config[3]}_{core_config[4]}_{core_config[5]}"
                         check = check_exception(op_info, core_config)
                         if check:
+                            # if ((n_card, n_core) == (8, 8)) & ((TP, PP, DP) == (1, 1, 8)) & ((micro_batch, core_parallelism[0], core_parallelism[1], core_parallelism[2], core_parallelism[3]) == (13, 1, 1, 1, 8)):
+                            #     breakpoint()
                             OP_latency_util, latency_util_per_operation, total_latency = get_latency_util(n_batch, micro_batch, op_info, n_core, card_parallelism, core_parallelism, core_config, n_layer)
                             temp_result[f"Card-{n_card}_Core-{n_core} \t {core_config[0]}_{core_config[1]}_{core_config[2]} \t TP-{TP}_PP-{PP}_DP-{DP}_mb-{micro_batch}_H-{core_parallelism[0]}_M-{core_parallelism[1]}_K-{core_parallelism[2]}_N-{core_parallelism[3]}"] = [OP_latency_util, latency_util_per_operation, total_latency]
                         else:
@@ -151,5 +156,5 @@ while n_core <= max_core_scale:
         n_card *= 2
     n_core *= 2
     
-
-breakpoint()
+with open(f'{base_raw_data_path}/results.pkl', 'wb') as file:
+    pickle.dump(total_result, file)
