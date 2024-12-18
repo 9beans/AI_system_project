@@ -36,8 +36,8 @@ simulation_threads = 64
 
 base_scalesim_code_path = "./scale-sim-v2/scalesim/scale.py"
 base_config_path = "./scale-sim-v2/project_configs"
-base_topology_path = "./scale-sim-v2/project_topologies"
-base_raw_data_path = "./scale-sim-v2/project_raw_data"
+base_topology_path = f"./scale-sim-v2/project_topologies/{target_model[3]}"
+base_raw_data_path = f"./scale-sim-v2/project_raw_data/{target_model[3]}"
 total_raw_data_fname = f"total_raw_data_{target_model[3]}.csv"
 
 os.makedirs(base_config_path, exist_ok=True)
@@ -121,7 +121,7 @@ while n_core <= max_core_scale:
                         if check:
                             if cfg_name not in topo_name_dict:
                                 topo_name_dict[cfg_name] = []
-                            topo_name_dict[cfg_name].append(f"{target_model[3]}_{topo_name}")
+                            topo_name_dict[cfg_name].append(f"{topo_name}")
                         else:
                             continue
                         
@@ -150,7 +150,9 @@ while n_core <= max_core_scale:
         
         config = find_best_config(temp_result)
         print(f"Best config: {config}")
-        breakpoint()
         total_result[(n_card, n_core)] = temp_result
         n_card *= 2
     n_core *= 2
+    
+
+breakpoint()

@@ -68,7 +68,7 @@ def make_topology(model_name, topo_name_, op_info_):
         # ws_data['Num Filter'].append(N)
     
     df = pd.DataFrame(data)
-    df.to_csv(f"{base_topology_path}/{model_name}_{topo_name_}_gemm.csv", index=False)
+    df.to_csv(f"{base_topology_path}/{topo_name_}_gemm.csv", index=False)
     
     # os_df = pd.DataFrame(os_data)
     # os_df.to_csv(f"{base_topology_path}/{topo_name_}_os.csv", index=False)
@@ -77,13 +77,13 @@ def make_topology(model_name, topo_name_, op_info_):
     # ws_df.to_csv(f"{base_topology_path}/{topo_name_}_ws.csv", index=False)
 
 
-def simulation_sth(model_name_, core_config_, topo_name_, thread_num_):
+def simulation_sth(core_config_, topo_name_, thread_num_):
     cfg_name = cfg_name_maker(core_config_)
     from project import base_scalesim_code_path, base_config_path, base_topology_path, base_raw_data_path
     os.makedirs(f"{base_raw_data_path}/{thread_num_}", exist_ok=True)
     
-    cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name}.cfg -t {base_topology_path}/{model_name_}_{topo_name_}_gemm.csv -p {base_raw_data_path}/{thread_num_} -i conv"
-    # cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name}.cfg -t {base_topology_path}/{topo_name_}.csv -p {base_raw_data_path}/{thread_num_} -i conv > /dev/null 2>&1"
+    cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name}.cfg -t {base_topology_path}/{topo_name_}_gemm.csv -p {base_raw_data_path}/{thread_num_} -i gemm"
+    # cmd = f"python3 {base_scalesim_code_path} -c {base_config_path}/{cfg_name}.cfg -t {base_topology_path}/{topo_name_}.csv -p {base_raw_data_path}/{thread_num_} -i gemm > /dev/null 2>&1"
     # print(cmd)
     # Use os.popen and read to ensure the process waits for completion
     os.popen(cmd).read()  # read() waits for the command to complete
@@ -124,7 +124,7 @@ def simulation_mth(model_name, total_hw_search_space_, topo_name_dict_):
             if exist:
                 if f"{cfg_name}_{topo_name}_0" in existing_df['LayerID'].values:
                     continue
-            cfg_topo_list.append((model_name, core_config, topo_name, case_num % simulation_threads))
+            cfg_topo_list.append((core_config, topo_name, case_num % simulation_threads))
             case_num += 1
     
     print(f"# total simulation : {case_num}")
