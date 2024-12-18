@@ -24,18 +24,6 @@ def make_config_dict(cfg_name_):
 
     return config_dict
 
-# core config 별 best를 뽑아서 plot을 하고
-def plot_core_config(systolic_dim_results_):
-    print()
-
-# <max scale = 64> best core config에 대해서 card parallelism에 대한 그래프를 그리고
-def plot_card_parallelism(card_parallelism_list_):
-    print()
-
-# <max scale = 64>  best core config와 best card parallelism에 대해서 core parallelism에 대한 그래프를 그린다다
-def plot_core_parallelism(core_parallelism_list_):
-    print()
-
 n_batch = 100
 n_token = 86
 
