@@ -26,8 +26,8 @@ def find_best_config(temp_result_):
     return best_config
     
 # n_layer, n_head, d_head, model_name
-# target_model = (12, 12, 64, "GPT2_S")
-target_model = (24, 16, 128, "MPT_1B_red_pajama")
+target_model = (12, 12, 64, "GPT2_S")
+# target_model = (24, 16, 128, "MPT_1B_red_pajama")
 # target_model = (32, 32, 128, "GPT3_7B")
 
 n_batch = 100
@@ -135,10 +135,7 @@ while n_core <= max_core_scale:
                         continue
                     if core_parallelism[2] != 1:        # accumulation dimension은 나누지 않는다 (EWADD 구현 복잡)
                         continue
-                    
-                    topo_name = f"TP-{TP}_M-{core_parallelism[1]}_K-{core_parallelism[2]}_N-{core_parallelism[3]}"
-                    make_topology(topo_name, op_info)
-                    
+                                        
                     for core_config in total_hw_search_space:
                         cfg_name = f"{NPU_name}_{core_config[0]}_{core_config[1]}_{core_config[2]}_{core_config[3]}_{core_config[4]}_{core_config[5]}"
                         check = check_exception(op_info, core_config)
