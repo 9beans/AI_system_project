@@ -3,7 +3,7 @@ import numpy as np
 import math
 import pickle
 from search_space import Topo_search_space
-from plot import scale_systolic_dim_graph, scale_core_parallelism_graph, scale_card_parallelism_graph
+from plot import scale_systolic_dim_latency_graph, scale_systolic_dim_throughput_graph, scale_core_parallelism_graph, scale_card_parallelism_graph
 from project import target_model
 
 def find_best_config(temp_result_):
@@ -133,8 +133,8 @@ for scale in scale_list:
     scale_systolic_dim_throughput_results[scale] = systolic_dim_throughput_results
 
 subplot_col = 4
-scale_systolic_dim_graph(scale_systolic_dim_latency_results, subplot_col)
-scale_systolic_dim_graph(scale_systolic_dim_throughput_results)
+scale_systolic_dim_latency_graph(scale_systolic_dim_latency_results, subplot_col)
+scale_systolic_dim_throughput_graph(scale_systolic_dim_throughput_results)
 
 
 # core parallelism graph
@@ -169,7 +169,7 @@ for scale in [8, 16, 32, 64]:
         # breakpoint()
         core_parallelism_results[(core_parallelism[0], core_parallelism[1], core_parallelism[3])][1] = min_latency_row['latency'].values[0]
         
-        print(min_latency_row)
+        # print(min_latency_row)
         
     scale_core_parallelism_results[scale] = core_parallelism_results
 
@@ -189,31 +189,56 @@ for card_parallelism in card_parallelism_list:
     card_parallelism = tuple(card_parallelism)
     card_parallelism_results[card_parallelism] = [None, float("inf")]
 
-fixed_systolic_dim_df = df[(df['sh'] == 128) & (df['sw'] == 128) & (df['H'] == 8) & (df['M'] == 1) & (df['K'] == 1) & (df['N'] == 1)].copy()
-error_margin = 0.000000001 # ns
-fixed_systolic_dim_df.loc[:, 'latency'] = (fixed_systolic_dim_df['latency'] / error_margin).round() * error_margin
+if target_model[2] == 64:
+    fixed_systolic_dim_df = df[(df['sh'] == 128) & (df['sw'] == 128) & (df['H'] == 8) & (df['M'] == 1) & (df['K'] == 1) & (df['N'] == 1)].copy()  
+    error_margin = 0.000000001 # ns
+    fixed_systolic_dim_df.loc[:, 'latency'] = (fixed_systolic_dim_df['latency'] / error_margin).round() * error_margin
 
-# [TP, PP, DP]
-for card_parallelism in card_parallelism_list:
-    if (target_model[1] % card_parallelism[0] != 0) | (target_model[0] % card_parallelism[1] != 0):
-        continue
-    card_parallelism = tuple(card_parallelism)
+    # [TP, PP, DP]
+    for card_parallelism in card_parallelism_list:
+        if (target_model[1] % card_parallelism[0] != 0) | (target_model[0] % card_parallelism[1] != 0):
+            continue
+        card_parallelism = tuple(card_parallelism)
+        
+        filtered_rows = fixed_systolic_dim_df[(fixed_systolic_dim_df['TP'] == card_parallelism[0]) & (fixed_systolic_dim_df['PP'] == card_parallelism[1]) & (fixed_systolic_dim_df['DP'] == card_parallelism[2])]
+        filtered_rows = filtered_rows.sort_values(by=['latency', 'TP', 'PP', 'DP', 'mb'], ascending=[True, True, True, True, False])
+        
+        min_latency_row = filtered_rows.head(1)
+        
+        card_parallelism_results[card_parallelism][0] = min_latency_row
+        # breakpoint()
+        card_parallelism_results[card_parallelism][1] = min_latency_row['latency'].values[0]
+        
+        print(min_latency_row)
+    scale_card_parallelism_graph(card_parallelism_results)
     
-    filtered_rows = fixed_systolic_dim_df[(fixed_systolic_dim_df['TP'] == card_parallelism[0]) & (fixed_systolic_dim_df['PP'] == card_parallelism[1]) & (fixed_systolic_dim_df['DP'] == card_parallelism[2])]
-    filtered_rows = filtered_rows.sort_values(by=['latency', 'TP', 'PP', 'DP', 'mb'], ascending=[True, True, True, True, False])
-    
-    breakpoint()
-    min_latency_row = filtered_rows.head(1)
-    
-    card_parallelism_results[card_parallelism][0] = min_latency_row
-    # breakpoint()
-    card_parallelism_results[card_parallelism][1] = min_latency_row['latency'].values[0]
-    
-    print(min_latency_row)
-breakpoint()
-# breakpoint()
-scale_card_parallelism_graph(card_parallelism_results)
+elif target_model[2] == 128:
+    H_M_K_N_list = [(1, 1, 1, 8), (2, 1, 1, 4), (4, 1, 1, 2), (8, 1, 1, 1)]
+    for H_M_K_N in H_M_K_N_list:
+        fixed_systolic_dim_df = df[(df['sh'] == 128) & (df['sw'] == 128) & (df['H'] == H_M_K_N[0]) & (df['M'] == H_M_K_N[1]) & (df['K'] == H_M_K_N[2]) & (df['N'] == H_M_K_N[3])].copy()
+        error_margin = 0.000000001 # ns
+        fixed_systolic_dim_df.loc[:, 'latency'] = (fixed_systolic_dim_df['latency'] / error_margin).round() * error_margin
 
+        # [TP, PP, DP]
+        for card_parallelism in card_parallelism_list:
+            if (target_model[1] % card_parallelism[0] != 0) | (target_model[0] % card_parallelism[1] != 0):
+                continue
+            card_parallelism = tuple(card_parallelism)
+            
+            filtered_rows = fixed_systolic_dim_df[(fixed_systolic_dim_df['TP'] == card_parallelism[0]) & (fixed_systolic_dim_df['PP'] == card_parallelism[1]) & (fixed_systolic_dim_df['DP'] == card_parallelism[2])]
+            filtered_rows = filtered_rows.sort_values(by=['latency', 'TP', 'PP', 'DP', 'mb'], ascending=[True, True, True, True, False])
+            
+            min_latency_row = filtered_rows.head(1)
+            
+            card_parallelism_results[card_parallelism][0] = min_latency_row
+            # breakpoint()
+            card_parallelism_results[card_parallelism][1] = min_latency_row['latency'].values[0]
+            
+            # print(min_latency_row)
+        scale_card_parallelism_graph(card_parallelism_results, H_M_K_N)
+    
+else:
+    assert False, "지원하지 않는 모델입니다."
+    
 
-breakpoint()
             
