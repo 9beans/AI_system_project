@@ -4,6 +4,7 @@ import math
 import pickle
 from search_space import Topo_search_space
 from plot import scale_systolic_dim_graph, scale_core_parallelism_graph, scale_card_parallelism_graph
+from project import target_model
 
 def find_best_config(temp_result_):
     best_config = ""
@@ -38,10 +39,6 @@ def plot_core_parallelism(core_parallelism_list_):
 n_batch = 100
 n_token = 86
 
-# n_layer, n_head, d_head, model_name
-# target_model = (12, 12, 64, "GPT2_S")
-target_model = (24, 16, 128, "MPT_1B_red_pajama")
-# target_model = (32, 32, 128, "GPT3_7B")
 base_raw_data_path = f"./scale-sim-v2/project_raw_data/{target_model[3]}"
 
 with open(f'{base_raw_data_path}/results.pkl', 'rb') as file:
