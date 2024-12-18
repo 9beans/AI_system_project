@@ -26,8 +26,8 @@ def find_best_config(temp_result_):
     return best_config
     
 # n_layer, n_head, d_head, model_name
-target_model = (12, 12, 64, "GPT2_S")
-# target_model = (24, 16, 128, "MPT_1B_red_pajama")
+# target_model = (12, 12, 64, "GPT2_S")
+target_model = (24, 16, 128, "MPT_1B_red_pajama")
 # target_model = (32, 32, 128, "GPT3_7B")
 
 n_batch = 100
@@ -113,19 +113,19 @@ while n_core <= max_core_scale:
                         continue
                     
                     topo_name = f"TP-{TP}_M-{core_parallelism[1]}_K-{core_parallelism[2]}_N-{core_parallelism[3]}"
-                    make_topology(topo_name, op_info)
-                    
+                    make_topology(target_model[3], topo_name, op_info)
+                    # breakpoint()
                     for core_config in total_hw_search_space:
                         cfg_name = f"{NPU_name}_{core_config[0]}_{core_config[1]}_{core_config[2]}_{core_config[3]}_{core_config[4]}_{core_config[5]}"
                         check = check_exception(op_info, core_config)
                         if check:
                             if cfg_name not in topo_name_dict:
                                 topo_name_dict[cfg_name] = []
-                            topo_name_dict[cfg_name].append(topo_name)
+                            topo_name_dict[cfg_name].append(f"{target_model[3]}_{topo_name}")
                         else:
                             continue
                         
-                simulation_mth(total_hw_search_space, topo_name_dict)
+                simulation_mth(target_model[3], total_hw_search_space, topo_name_dict)
                 
                 print(f"{n_card}-card {n_core}-core {micro_batch}-micro_batch {TP}-{PP}-{DP}-card_parallelism simulation end")
                 
