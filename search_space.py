@@ -15,13 +15,13 @@ def check_exception(op_info_, core_config_):
         Systolic_W = core_config_[1]
         Systolic_Dataflow = core_config_[2]
         
-        if (Systolic_Dataflow == "os") & ((M < Systolic_H) & (N < Systolic_W)):
-            return False
-        elif (Systolic_Dataflow == "ws") & ((K < Systolic_H) & (N < Systolic_W)):
-            return False
-        else:
-            return True
-        
+        # if (Systolic_Dataflow == "os") & ((M < Systolic_H) & (N < Systolic_W)):
+        #     return False
+        # elif (Systolic_Dataflow == "ws") & ((K < Systolic_H) & (N < Systolic_W)):
+        #     return False
+        # else:
+        #     return True
+        return True
     
     
 # Card_parallelism_ : (TP, PP, DP), Core_parallelism_ : (H, M, K, N)

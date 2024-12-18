@@ -3,7 +3,7 @@ import numpy as np
 import math
 import pickle
 from search_space import Topo_search_space
-from plot import scale_systolic_dim_graph
+from plot import scale_systolic_dim_graph, scale_core_parallelism_graph, scale_card_parallelism_graph
 
 def find_best_config(temp_result_):
     best_config = ""
@@ -36,6 +36,7 @@ def plot_core_parallelism(core_parallelism_list_):
     print()
 
 n_batch = 100
+n_token = 86
 
 # n_layer, n_head, d_head, model_name
 target_model = (12, 12, 64, "GPT2_S")
@@ -70,87 +71,162 @@ for card_core_config, result_dict in total_result_dict.items():     # scale 별 
     total_result_df_dict[scale] =  pd.DataFrame(df_row)
     scale_list.append(scale)
     
-scale_systolic_dim_results = {}
-for scale in scale_list:
-    df = total_result_df_dict[scale]
-    df.loc[:, (df.columns != 'dataflow') & (df.columns != 'cfg_name') & (df.columns != 'latency')] = df.loc[:, (df.columns != 'dataflow') & (df.columns != 'cfg_name') & (df.columns != 'latency')].astype(int)
+scale_systolic_dim_latency_results = {}
+scale_systolic_dim_throughput_results = {}
+total_token = n_batch * n_token
+# for scale in scale_list:
+#     df = total_result_df_dict[scale]
+#     df.loc[:, (df.columns != 'dataflow') & (df.columns != 'cfg_name') & (df.columns != 'latency')] = df.loc[:, (df.columns != 'dataflow') & (df.columns != 'cfg_name') & (df.columns != 'latency')].astype(int)
     
-    systolic_dim_results = {
-                                # (1, 16384) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
-                                # (2, 8192) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
-                                # (4, 4096) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
-                                # (8, 2048) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
-                                # (16, 1024) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
-                                (32, 512) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
-                                (64, 256) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
-                                (128, 128) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
-                                (256, 64) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
-                                (512, 32) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
-                                # (1024, 16) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
-                                # (2048, 8) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
-                                # (4096, 4) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
-                                # (8192, 2) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
-                                # (16384, 1) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
-                            }
+#     systolic_dim_latency_results = {
+#                                 # (1, 16384) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (2, 8192) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (4, 4096) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (8, 2048) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (16, 1024) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 (32, 512) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 (64, 256) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 (128, 128) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 (256, 64) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 (512, 32) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (1024, 16) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (2048, 8) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (4096, 4) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (8192, 2) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (16384, 1) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                             }
     
-    ws_rows = df[df['dataflow'] == 'ws']
-    os_rows = df[df['dataflow'] == 'os']
-    target_systolic_dim_list = list(systolic_dim_results.keys())
+#     systolic_dim_throughput_results = {
+#                                 # (1, 16384) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (2, 8192) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (4, 4096) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (8, 2048) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (16, 1024) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 (32, 512) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 (64, 256) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 (128, 128) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 (256, 64) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 (512, 32) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (1024, 16) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (2048, 8) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (4096, 4) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (8192, 2) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                                 # (16384, 1) : {"ws" : [None, float("inf")], "os" : [None, float("inf")]},
+#                             }
     
-    for systolic_dim in target_systolic_dim_list:
-        filtered_ws_rows = ws_rows[(ws_rows['sh'] == systolic_dim[0]) & (ws_rows['sw'] == systolic_dim[1])].copy()
-        filtered_os_rows = os_rows[(os_rows['sh'] == systolic_dim[0]) & (os_rows['sw'] == systolic_dim[1])].copy()
-        
-        error_margin = 0.000000001 # ns
-        filtered_ws_rows.loc[:, 'latency'] = (filtered_ws_rows['latency'] / error_margin).round() * error_margin
-        filtered_os_rows.loc[:, 'latency'] = (filtered_os_rows['latency'] / error_margin).round() * error_margin
-        
-        filtered_ws_rows = filtered_ws_rows.sort_values(by=['latency', 'mb'], ascending=[True, False])
-        filtered_os_rows = filtered_os_rows.sort_values(by=['latency', 'mb'], ascending=[True, False])
-        min_latency_ws_row = filtered_ws_rows.head(1)
-        min_latency_os_row = filtered_os_rows.head(1)
-        
-        systolic_dim_results[systolic_dim]['ws'][0] = min_latency_ws_row
-        systolic_dim_results[systolic_dim]['ws'][1] = min_latency_ws_row['latency'].values[0]
-        systolic_dim_results[systolic_dim]['os'][0] = min_latency_os_row
-        systolic_dim_results[systolic_dim]['os'][1] = min_latency_os_row['latency'].values[0]
-        
-        # print(min_latency_ws_row)
-        # print(min_latency_os_row)
-        
-    scale_systolic_dim_results[scale] = systolic_dim_results
+#     ws_rows = df[df['dataflow'] == 'ws']
+#     os_rows = df[df['dataflow'] == 'os']
+#     target_systolic_dim_list = list(systolic_dim_latency_results.keys())
     
-scale_systolic_dim_graph(scale_systolic_dim_results)
-breakpoint()
+#     for systolic_dim in target_systolic_dim_list:
+#         filtered_ws_rows = ws_rows[(ws_rows['sh'] == systolic_dim[0]) & (ws_rows['sw'] == systolic_dim[1])].copy()
+#         filtered_os_rows = os_rows[(os_rows['sh'] == systolic_dim[0]) & (os_rows['sw'] == systolic_dim[1])].copy()
+        
+#         error_margin = 0.000000001 # ns
+#         filtered_ws_rows.loc[:, 'latency'] = (filtered_ws_rows['latency'] / error_margin).round() * error_margin
+#         filtered_os_rows.loc[:, 'latency'] = (filtered_os_rows['latency'] / error_margin).round() * error_margin
+        
+#         filtered_ws_rows = filtered_ws_rows.sort_values(by=['latency', 'mb'], ascending=[True, False])
+#         filtered_os_rows = filtered_os_rows.sort_values(by=['latency', 'mb'], ascending=[True, False])
+#         min_latency_ws_row = filtered_ws_rows.head(1)
+#         min_latency_os_row = filtered_os_rows.head(1)
+        
+#         systolic_dim_latency_results[systolic_dim]['ws'][0] = min_latency_ws_row
+#         systolic_dim_latency_results[systolic_dim]['ws'][1] = min_latency_ws_row['latency'].values[0]
+#         systolic_dim_latency_results[systolic_dim]['os'][0] = min_latency_os_row
+#         systolic_dim_latency_results[systolic_dim]['os'][1] = min_latency_os_row['latency'].values[0]
+        
+#         systolic_dim_throughput_results[systolic_dim]['ws'][0] = min_latency_ws_row
+#         systolic_dim_throughput_results[systolic_dim]['ws'][1] = int(total_token / min_latency_ws_row['latency'].values[0])
+#         systolic_dim_throughput_results[systolic_dim]['os'][0] = min_latency_os_row
+#         systolic_dim_throughput_results[systolic_dim]['os'][1] = int(total_token / min_latency_os_row['latency'].values[0])
+        
+#         # print(min_latency_ws_row)
+#         # print(min_latency_os_row)
+        
+#     scale_systolic_dim_latency_results[scale] = systolic_dim_latency_results
+#     scale_systolic_dim_throughput_results[scale] = systolic_dim_throughput_results
 
-scale_core_parallelism_results = {}
-# core parallelism graph
-for scale in [8, 16, 32, 64]:
-    df = total_result_df_dict[scale]
-    df.loc[:, (df.columns != 'dataflow') & (df.columns != 'cfg_name') & (df.columns != 'latency')] = df.loc[:, (df.columns != 'dataflow') & (df.columns != 'cfg_name') & (df.columns != 'latency')].astype(int)
+# subplot_col = 4
+# scale_systolic_dim_graph(scale_systolic_dim_latency_results, subplot_col)
+# scale_systolic_dim_graph(scale_systolic_dim_throughput_results)
+
+
+# # core parallelism graph
+# scale_core_parallelism_results = {}
+# for scale in [8, 16, 32, 64]:
+#     df = total_result_df_dict[scale]
+#     df.loc[:, (df.columns != 'dataflow') & (df.columns != 'cfg_name') & (df.columns != 'latency')] = df.loc[:, (df.columns != 'dataflow') & (df.columns != 'cfg_name') & (df.columns != 'latency')].astype(int)
     
-    core_parallelism_results = {}
-    for core_parallelism in core_parallelism_list:
-        core_parallelism_results[core_parallelism] = [None, float("inf")]
+#     core_parallelism_results = {}
+#     for core_parallelism in core_parallelism_list:
+#         if core_parallelism[2] != 1:        # accumulation dimension은 나누지 않는다 (EWADD 구현 복잡)
+#             continue
+#         core_parallelism = tuple(core_parallelism)
+#         core_parallelism_results[(core_parallelism[0], core_parallelism[1], core_parallelism[3])] = [None, float("inf")]
     
+#     fixed_systolic_dim_df = df[(df['sh'] == 128) & (df['sw'] == 128)].copy()
+#     error_margin = 0.000000001 # ns
+#     fixed_systolic_dim_df.loc[:, 'latency'] = (fixed_systolic_dim_df['latency'] / error_margin).round() * error_margin
     
-    
-    fixed_systolic_dim_df = df[(df['sh'] == 128) & (df['sw'] == 128)].copy()
-    fixed_systolic_dim_df = fixed_systolic_dim_df.sort_values(by=['latency', 'H', 'M', 'N'], ascending=[True, True, True, True])
-    
-    # [H, M, K, N]
-    for core_parallelism in core_parallelism_list:
-        filtered_rows = fixed_systolic_dim_df[(fixed_systolic_dim_df['H'] == core_parallelism[0]) & (fixed_systolic_dim_df['M'] == core_parallelism[1]) & (fixed_systolic_dim_df['N'] == core_parallelism[3])]
-        filtered_rows = filtered_rows.sort_values(by=['latency', 'mb'], ascending=[True, False])
+#     # [H, M, K, N]
+#     for core_parallelism in core_parallelism_list:
+#         core_parallelism = tuple(core_parallelism)
+#         if core_parallelism[2] != 1:        # accumulation dimension은 나누지 않는다 (EWADD 구현 복잡)
+#             continue
         
-        min_latency_row = filtered_ws_rows.head(1)
+#         filtered_rows = fixed_systolic_dim_df[(fixed_systolic_dim_df['H'] == core_parallelism[0]) & (fixed_systolic_dim_df['M'] == core_parallelism[1]) & (fixed_systolic_dim_df['N'] == core_parallelism[3])]
+#         filtered_rows = filtered_rows.sort_values(by=['latency', 'H', 'M', 'N', 'mb'], ascending=[True, True, True, True, False])
         
-        systolic_dim_results[core_parallelism][0] = min_latency_row
-        systolic_dim_results[core_parallelism][1] = min_latency_row['latency'].values[0]
+#         min_latency_row = filtered_rows.head(1)
         
-        print(min_latency_row)
+#         core_parallelism_results[(core_parallelism[0], core_parallelism[1], core_parallelism[3])][0] = min_latency_row
+#         # breakpoint()
+#         core_parallelism_results[(core_parallelism[0], core_parallelism[1], core_parallelism[3])][1] = min_latency_row['latency'].values[0]
         
-    scale_core_parallelism_results[scale] = systolic_dim_results
+#         print(min_latency_row)
+        
+#     scale_core_parallelism_results[scale] = core_parallelism_results
+
+# subplot_col = 1
+# scale_core_parallelism_graph(scale_core_parallelism_results, subplot_col)
+
+
+# breakpoint()
+# card parallelism graph
+scale = 64
+scale_card_parallelism_results = {}
+df = total_result_df_dict[scale]
+df.loc[:, (df.columns != 'dataflow') & (df.columns != 'cfg_name') & (df.columns != 'latency')] = df.loc[:, (df.columns != 'dataflow') & (df.columns != 'cfg_name') & (df.columns != 'latency')].astype(int)
+
+card_parallelism_results = {}
+for card_parallelism in card_parallelism_list:
+    card_parallelism = tuple(card_parallelism)
+    card_parallelism_results[card_parallelism] = [None, float("inf")]
+
+fixed_systolic_dim_df = df[(df['sh'] == 128) & (df['sw'] == 128) & (df['H'] == 8) & (df['M'] == 1) & (df['K'] == 1) & (df['N'] == 1)].copy()
+error_margin = 0.000000001 # ns
+fixed_systolic_dim_df.loc[:, 'latency'] = (fixed_systolic_dim_df['latency'] / error_margin).round() * error_margin
+
+# [TP, PP, DP]
+for card_parallelism in card_parallelism_list:
+    card_parallelism = tuple(card_parallelism)
+    
+    filtered_rows = fixed_systolic_dim_df[(fixed_systolic_dim_df['TP'] == card_parallelism[0]) & (fixed_systolic_dim_df['PP'] == card_parallelism[1]) & (fixed_systolic_dim_df['DP'] == card_parallelism[2])]
+    filtered_rows = filtered_rows.sort_values(by=['latency', 'TP', 'PP', 'DP', 'mb'], ascending=[True, True, True, True, False])
+    
+    breakpoint()
+    min_latency_row = filtered_rows.head(1)
+    
+    card_parallelism_results[card_parallelism][0] = min_latency_row
+    # breakpoint()
+    card_parallelism_results[card_parallelism][1] = min_latency_row['latency'].values[0]
+    
+    print(min_latency_row)
+breakpoint()
+# breakpoint()
+scale_card_parallelism_graph(card_parallelism_results)
+
 
 breakpoint()
             
