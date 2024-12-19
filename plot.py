@@ -182,8 +182,8 @@ def scale_card_parallelism_graph(card_parallelism_results_, H_M_K_N_):
     if core == 0:
         core = 8
     
-    ax.set_title(f"Scale (card, core): ({card}, {core}) , Core parallelism: {H_M_K_N_}", fontsize = main_fontsize)
-    ax.set_xlabel("Model Parallelism & Data Parallelism at Card-level (TP, PP, DP)", fontsize = main_fontsize)
+    ax.set_title(f"Scale (card, core): ({card}, {core}), Core parallelism: {H_M_K_N_}", fontsize = main_fontsize)
+    ax.set_xlabel("Card Parallelism (TP, PP, DP)", fontsize = main_fontsize)
     ax.set_ylabel("Latency (sec)", fontsize = main_fontsize)
     ax.legend(fontsize = small_fontsize)
     ax.grid(True, linestyle='--', alpha=0.6)
