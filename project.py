@@ -6,8 +6,8 @@ from latency_modeling import get_latency_util
 import pickle
 
 # n_layer, n_head, d_head, model_name
-target_model = (12, 12, 64, "GPT2_S")
-# target_model = (24, 16, 128, "MPT_1B_red_pajama")
+# target_model = (12, 12, 64, "GPT2_S")
+target_model = (24, 16, 128, "MPT_1B_red_pajama")
 # target_model = (32, 32, 128, "GPT3_7B")
 
 NPU_name = "TPUv4"
