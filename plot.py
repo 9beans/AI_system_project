@@ -162,7 +162,7 @@ def scale_card_parallelism_graph(card_parallelism_results_, H_M_K_N_):
     small_fontsize = 12
 
     # Create subplots
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(7, 4))
     
     # Plot for each systolic dimension result
     x_values = list(card_parallelism_results_.keys())
