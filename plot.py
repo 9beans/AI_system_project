@@ -10,7 +10,7 @@ def scale_systolic_dim_latency_graph(scale_systolic_dim_latency_results_, subplo
     num_rows = (num_scales + num_cols - 1) // num_cols  # Calculate required rows for the number of subplots
 
     # Create subplots
-    fig, axes = plt.subplots(num_rows, num_cols, figsize=(13, 10))
+    fig, axes = plt.subplots(num_rows, num_cols, figsize=(13, 6))
     axes = axes.flatten()
 
     # Plot for each scale
