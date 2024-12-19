@@ -116,7 +116,7 @@ def scale_core_parallelism_graph(scale_core_parallelism_results_, subplot_col_):
     num_rows = (num_scales + num_cols - 1) // num_cols  # Calculate required rows for the number of subplots
 
     # Create subplots
-    fig, axes = plt.subplots(num_rows, num_cols, figsize=(15, 10))
+    fig, axes = plt.subplots(num_rows, num_cols, figsize=(8, 10))
     axes = axes.flatten()
 
     # Plot for each scale
